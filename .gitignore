@@ -1,0 +1,21 @@
+venv/
+Redes2/
+Compiladores/
+Proyecto Redes/Lista_Archivos
+Proyecto Redes/Lista_Archivos_linux1
+Proyecto Redes/Lista_Archivos_linux3
+Proyecto Redes/prueba.txt
+Proyecto Redes/pru.py
+.gitignore
+autogit.txt
+cliente
+imagen.pdf
+imagenmodificada.pdf
+Numero magico.py
+PRUEBAS.py
+servidor.py
+UDPClientBroadcast.py
+UDPClientMulticast.py
+UDPServerBroadcast.py
+UDPServerMulticast.py
+.idea/
