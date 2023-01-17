@@ -10,11 +10,58 @@ TCP_IP = '0.0.0.0'
 TCP_PORT = 2002
 BUFFER_SIZE = 1024  # Usually 1024, but we need quick response
 HILOS = []
+Names_Lis=set()
 bytesToSend = None
 
 tcpServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 tcpServer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 tcpServer.bind((TCP_IP, TCP_PORT))
+
+def PedirFile(nombre,direccion):
+    try:
+        tcpPedir = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        tcpPedir.connect((direccion))
+        paquetes_enviados = 0
+        bytesToSend = ('$$NED$$:'+str(nombre)).encode('UTF-8')
+        tcpPedir.send(bytesToSend)
+        data_doc=list()
+        nombre_archivo=''
+        bytesToSend = None
+        while True:
+            data = tcpPedir.recv(200)
+            if 'FIN DEL ENVIO' in data.decode("UTF-8", 'ignore'):
+                Names_Lis.add(nombre_archivo)
+                NewDoc = threading.Thread(target=CrearDoc, args=(data_doc,archivo_path))
+                NewDoc.start()
+                NewDoc.join()
+                CrearDoc(data_doc, archivo_path)
+                print(f'RECIBO DEL ARCHIVO: {nombre_archivo} COMPLETADO')
+                print(f'''
+                            Nombre archivo:{nombre_archivo}
+                            PATCHN ARCHIVO: {archivo_path}''')
+                break
+            elif 'nombre:' in data.decode("UTF-8", 'ignore'):
+                nombre_archivo = data.decode("UTF-8", 'ignore')[7:len(data.decode("UTF-8", 'ignore'))]
+                archivo_path = carpeta_path + '\\' + str(nombre_archivo)
+            else:
+                data_doc.append(data)
+        tcpPedir.close()
+        return True
+    except ConnectionRefusedError:
+        return False
+
+def ChecarBorrados(Carpeta_Path):
+    while True:
+        FName = os.listdir(Carpeta_Path)
+        FDir=list(Names_Lis)
+        for file in FName:
+            if file not in FDir:
+                if PedirFile(file,(socket.gethostname(),2001)):
+                    print('Archivo Adquirido')
+                else:
+                    PedirFile(file,(socket.gethostname(),2001))
+                    print('Archivo Adquirido')
+        time.sleep(5)
 
 
 def EnviarPartArchivo(conexion, path_archvio, nombre_archivo):
@@ -54,6 +101,7 @@ def CrearDoc(data, path_archivo):
     with open(path_archivo, 'ab') as file:
         for line in data:
             file.write(line)
+    return
 
 
 def EnviarArchivo(direccion_linux, archvio, nombre,maquina):
@@ -96,9 +144,8 @@ def client_newDoc(ip, port, conexxion, carpeta_path):
     if conexxion:
         while True:
             data = conexxion.recv(200)
-            # print(data)
-            # print(f'DATA: {data.decode("UTF-8")}')
             if 'FIN DEL ENVIO' in data.decode("UTF-8", 'ignore'):
+                Names_Lis.add(nombre_archivo)
                 CrearDoc(data_doc, archivo_path)
                 paquetes_recividos += 1
                 print(f'RECIBO DEL ARCHIVO: {nombre_archivo} COMPLETADO')
@@ -153,6 +200,9 @@ else:
         print("La creación del directorio %s falló" % carpeta)
     else:
         print("Se ha creado el directorio: %s " % carpeta)
+Checar_Existencia = threading.Thread(target=ChecarBorrados, args=(carpeta_path))
+Checar_Existencia.start()
+Checar_Existencia.join()
 # ---------------------------------------------------------------------------------------------------------
 while True:
     tcpServer.listen()
