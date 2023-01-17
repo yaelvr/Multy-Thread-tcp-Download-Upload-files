@@ -1,0 +1,94 @@
+*{
+    background-color: rgb(240, 240, 240);
+    font-family: Arial, Helvetica, sans-serif;
+}
+.contenedor{
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+    text-align: center;
+}
+.title{
+    margin-top: 5rem;
+    font-size: 2rem;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.Upload{
+    width: 20rem;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 1rem;
+    border: none;
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: 1fr ;
+    gap: 2rem;
+}
+.Upload:hover .btn-CHS{
+    background-color: rgb(6, 83, 170);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
+}
+    
+.Filex{
+    height: 0rem;
+    width: 0rem;
+    overflow: hidden;
+}
+.btn-CHS{
+    margin-left: auto;
+    margin-right: auto;
+    width: 20rem;
+    height: 4rem;
+    grid-area:1/1/2/2; 
+    background-color: rgb(54, 129, 214);
+    border: none;
+    border-radius: 1rem;
+    color: white;
+    font-size: 2rem;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+    cursor: pointer;
+    padding-top: 1rem;
+    padding-bottom: 0rem;
+}
+.fontCHG{
+    font-size: 1rem !important;
+}
+.tokenx{
+    z-index: -2;
+}
+
+.btn-UPLOAD{
+    margin-left: auto;
+    margin-right: auto;
+    width: 20rem;
+    background-color: rgb(122, 189, 96);
+    border: none;
+    border-radius: 1rem;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+}
+
+.btn-UPLOAD:hover{
+    background-color: rgb(46, 161, 0);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.Files{
+    display: flex;
+    flex-direction: column;
+}
+.Files-title{
+    margin-top: 5rem;
+    font-size: 2rem;
+    font-family: Arial, Helvetica, sans-serif;
+    margin-left: auto;
+    margin-right: auto;
+}
+.li-files{
+    width: 30rem;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/app.css') }}" />
+    <title>Upload Document</title>
+</head>
+
+<body>
+    <form method='POST' enctype='multipart/form-data' class="contenedor">
+        <label class="title">Ingresa el archivo que deses enviar</label>
+        <div class="Upload">
+        <div class="btn-CHS"id="yourBtn" onclick="getFile()">Choose File</div>
+            {{form.hidden_tag()}}
+            {{form.file(class_='Filex',id_='file1',onchange_='sub(this)')}}
+        </div>
+        {{form.submit(class_='btn-UPLOAD')}}
+    </form>
+    <script src="{{ url_for('static',filename='js/app.js') }}" ></script>
+    <div class="Files">
+        <h1 class="Files-title">Files Uploaded</h1>
+        <ul class="ul-files">
+            {% for name in data.namex %}
+            <li class="li-files"><label>{{name}}</label><form method="post" action="/"><button type="submit" name="action1" value={{name}}>DESCARGAR</button></form></li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+
+</html>
