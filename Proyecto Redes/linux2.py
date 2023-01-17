@@ -17,38 +17,31 @@ tcpServer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 tcpServer.bind((TCP_IP, TCP_PORT))
 
 
-def EnviarPartArchivo(direccion_servidor, path_archvio, nombre_archivo):
-    # host = socket.gethostname()
-    # port = 2004
-    tcpClientDocLoader = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # tcpClientA.connect((host, port))
-    tcpClientDocLoader.connect((direccion_servidor))
+def EnviarPartArchivo(conexion, path_archvio, nombre_archivo):
+    print('Enviar parte del archivo')
     # --------------------------------------------------------------------
     try:
         # Determinar el largo del archivo y dividirlo en 3 partes enteras
         with open(path_archvio, 'rb') as filex:
             size_reduce = len(filex.read()) // 3
         with open(path_archvio, 'rb') as file:
-            bytesToSend = ('nombre:' + str(nombre_archivo) + '').encode('UTF-8')
-            tcpClientDocLoader.send(bytesToSend)
-            time.sleep(.5)
-            bytesToSend = ('PARTE2').encode('UTF-8')
-            tcpClientDocLoader.send(bytesToSend)
-            time.sleep(.5)
+            bytesToSend= ('$$Buffer-Size$$:').encode('UTF-8')+(str(size_reduce)).encode('UTF-8')
+            conexion.send(bytesToSend)
+            bytesToSend=None
             parte_1 = file.read(size_reduce)
             parte_2 = file.read(size_reduce)
             parte_3 = file.read()
-            # Envia la parte 1 del archivo
-            tcpClientDocLoader.send(parte_1)
-            bytesToSend = 'FIN DEL ENVIO'.encode("UTF-8")
-        tcpClientDocLoader.send(bytesToSend)
+            print(parte_2)
+            bytesToSend=('PARTE2$').encode('UTF-8')+parte_2
+            conexion.send(bytesToSend)
+            bytesToSend=('$$TERMINO $$ENVIO PARTE').encode('UTF-8')
+            conexion.send(bytesToSend)
+
     except FileNotFoundError:
         print(f'Ese archivo no existe en el directorio actual {path_archvio}')
-
-        # --------------------------------------------------------------------
-    tcpClientDocLoader.close()
-    print('Funcion enviar archivo close')
-
+        return False
+    print('Funcion enviar partes del  archivo "CLOSE"')
+    return True
 
 def CrearDoc(data, path_archivo):
     try:
@@ -64,9 +57,6 @@ def CrearDoc(data, path_archivo):
 
 
 def EnviarArchivo(direccion_linux, archvio, nombre,maquina):
-    host = socket.gethostname()
-    BUFFER_SIZE = 2000
-    port = 2001
     tcpClientLinux2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # tcpClientLinux2.connect((host, port))
     tcpClientLinux2.connect(direccion_linux)
@@ -75,6 +65,7 @@ def EnviarArchivo(direccion_linux, archvio, nombre,maquina):
         paquetes_enviados = 0
         bytesToSend = ('nombre:' + str(nombre) + '').encode('UTF-8')
         tcpClientLinux2.send(bytesToSend)
+        time.sleep(.5)
         with open(archvio, 'rb') as file:
             bytesToSend = None
             while piece := file.read(150):
@@ -112,18 +103,28 @@ def client_newDoc(ip, port, conexxion, carpeta_path):
                 paquetes_recividos += 1
                 print(f'RECIBO DEL ARCHIVO: {nombre_archivo} COMPLETADO')
                 time.sleep(5)
+                print(f'''
+                    Nombre archivo:{nombre_archivo}
+                    PATCHN ARCHIVO: {archivo_path}''')
                 linux1 = threading.Thread(target=EnviarArchivo, args=((socket.gethostname(), 2001), archivo_path, nombre_archivo,'Linux 1'))
                 linux3 = threading.Thread(target=EnviarArchivo, args=((socket.gethostname(), 2003), archivo_path, nombre_archivo, 'Linux 3'))
                 linux1.start()
                 linux3.start()
+                linux1.join()
+                linux3.join()
                 break
-            elif 'ENVIAR PARTE' in data.decode("UTF-8", 'ignore'):
+            elif '3Nv1AR$PART32' in data.decode("UTF-8", 'ignore'):
+                print('Siuuuu')
+                direccion_servidor = (socket.gethostname(), 2007)
+                nombre = data.decode("UTF-8", 'ignore')[13:len(data.decode("UTF-8", 'ignore'))]
+                archivo_pathX = carpeta_path + '\\' + str(nombre)
                 paquetes_recividos += 1
-                pass
-                # enviarParte= threading.Thread(target=EnviarPartArchivo, args=(direccion_servidor,archivo_path,nombre_archivo))
-                # enviarParte.start()
-                # HILOS.append(enviarParte)
-
+                PART = EnviarPartArchivo(conexxion, archivo_pathX, nombre)
+                if PART:
+                    conexxion.close()
+                    break
+                else:
+                    print('NO SE PUDO ABRIR EL ARCHIVO')
             elif 'nombre:' in data.decode("UTF-8", 'ignore'):
                 paquetes_recividos += 1
                 nombre_archivo = data.decode("UTF-8", 'ignore')[7:len(data.decode("UTF-8", 'ignore'))]
@@ -134,8 +135,6 @@ def client_newDoc(ip, port, conexxion, carpeta_path):
                 paquetes_recividos += 1
                 # print(paquetes_recividos)
         # print(f'Paquetes Recividos: {paquetes_recividos}')
-    linux1.join()
-    linux3.join()
     conexxion.close()
     return
 
